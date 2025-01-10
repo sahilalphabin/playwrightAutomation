@@ -127,7 +127,7 @@ test.describe('Item', () => {
     const newTodo = page.getByPlaceholder('What needs to be done?');
 
     // Create two items.
-    for (const item of TODO_ITEMS.slice(0, 2)) {
+    for (const item of TODO_ITEMS.slice(0, 2)) {  
       await newTodo.fill(item);
       await newTodo.press('Enter');
     }

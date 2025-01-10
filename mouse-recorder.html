@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mouse Movement Recorder</title>
+    <style>
+        #canvas {
+            border: 1px solid black;
+            background: #f0f0f0;
+        }
+        #output {
+            margin-top: 20px;
+            width: 100%;
+            height: 150px;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+    </div>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <div>
+        <textarea id="output" readonly></textarea>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const output = document.getElementById('output');
+        let isRecording = false;
+        let points = [];
+        let startPoint = null;
+
+        function startRecording() {
+            isRecording = false; // Set to false initially
+            points = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            output.value = '';
+            
+            // Delay recording for 1 second
+            setTimeout(() => {
+                isRecording = true;
+            }, 1000);
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            if (points.length > 0) {
+                const relativePoints = points.map(point => ({
+                    x: Math.round(point.x - startPoint.x),
+                    y: Math.round(point.y - startPoint.y)
+                }));
+                output.value = JSON.stringify(relativePoints, null, 2);
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isRecording) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (points.length === 0) {
+                startPoint = { x, y };
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+            
+            points.push({ x, y });
+            ctx.stroke();
+        });
+
+    </script>
+</body>
+</html>
