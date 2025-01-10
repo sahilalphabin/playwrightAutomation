@@ -25,13 +25,9 @@ let freeHand = async (page, box) => {
     const filePath = path.join('recorded-shapes', `shape1.json`);
     const data = await fs.readFile(filePath, 'utf8');       
     const shape = JSON.parse(data);
-
-
     await page.locator('//button[@data-testid="CreationBarButton--PEN"]').click();
-    
     const xOffset = box.x + box.width/2;
     const yOffset = box.y + box.height/2;
-    
     // Start the drawing
     await page.mouse.move(xOffset + shape.points[0].x, yOffset + shape.points[0].y);
     await page.mouse.down();
@@ -87,7 +83,7 @@ let mouse_move_down_up = async (page, xStart, yStart, xFinish, yFinish) =>{
     }
 
 
-test('Rectangle :: Miro log in--> New design File --> Create Rectangle --> Move Rectangle', async ({ page, context }) => {
+test('Rectangle', async ({ page, context }) => {
     // ** Env variables a
     if (!process.env.FIGMA_EMAIL || !process.env.FIGMA_PASS || !process.env.MIRO_PASS) {
         throw new Error('FIGMA_EMAIL and FIGMA_PASS environment variables must be set');
@@ -113,9 +109,44 @@ test('Rectangle :: Miro log in--> New design File --> Create Rectangle --> Move 
     // freehand 
     //await freeHand(page, box);
 })
+test('Miro Ai', async ({ page, context }) => {
+    // ** Env variables a
+    if (!process.env.FIGMA_EMAIL || !process.env.FIGMA_PASS || !process.env.MIRO_PASS) {
+        throw new Error('FIGMA_EMAIL and FIGMA_PASS environment variables must be set');
+    }
+    await page.goto('https://www.miro.com/login', { timeout: 45000 });
+    await page.getByPlaceholder("Enter your email address").fill(process.env.FIGMA_EMAIL);
+    await page.getByPlaceholder("Enter your password").fill(process.env.MIRO_PASS,{timeout:1000})
+    await page.getByText('Continue with email').click({timeout:10000})
+
+    await page.locator('//div[@data-role="boards-list"]//a').first().click({timeout:10000})
+
+    
+
+    // Get the canvas bounding box
+    await page.waitForSelector('canvas', { state: 'visible', timeout: 30000 });
+    let box = await page.locator('canvas').first().boundingBox();
+    if (!box) {
+        throw new Error('Could not get canvas bounding box');
+    }
+    await page.locator('//button[@data-testid="CreationBarButton--GENAI_PANEL"]').first().click({timeout:10000})
+    await page.locator('//button[@data-onboarding-target="ai-panel--ai_diagram-tool"]').first().click({timeout:10000})
+    await page.locator('//textarea[@data-onboarding-target="ai-panel--prompt-input"]').fill("Login miro playwright")
+    await page.locator('//button[@data-onboarding-target="ai-panel--generate-button"]').click()
 
 
-test('Circle :: Miro log in--> New design File --> Create Circle --> Move Circle', async ({ page, context }) => {
+    await page.waitForTimeout(50000)
+    await page.screenshot({path: 'ScreenShots/aiPromptMiro.png'})
+
+    // Draw Works -- 
+    //await draw_rect(page, box, 10, 10)
+    //await draw_circle(page,box,35,20)
+
+    // freehand 
+    //await freeHand(page, box);
+})
+
+test('Circle', async ({ page, context }) => {
     // ** Env variables a
     if (!process.env.FIGMA_EMAIL || !process.env.FIGMA_PASS || !process.env.MIRO_PASS) {
         throw new Error('FIGMA_EMAIL and FIGMA_PASS environment variables must be set');
@@ -144,7 +175,7 @@ test('Circle :: Miro log in--> New design File --> Create Circle --> Move Circle
 
 
 
-test('Free hand :: Miro log in--> New design File --> Select pen --> Free hand ', async ({ page, context }) => {
+test('Free hand', async ({ page, context }) => {
     // ** Env variables a
     if (!process.env.FIGMA_EMAIL || !process.env.FIGMA_PASS || !process.env.MIRO_PASS) {
         throw new Error('FIGMA_EMAIL and FIGMA_PASS environment variables must be set');
@@ -168,7 +199,7 @@ test('Free hand :: Miro log in--> New design File --> Select pen --> Free hand '
     await freeHand(page, box);
 })
 
-test('diagram :: Miro log in--> New design File --> Select diagram --> diagram ', async ({ page, context }) => {
+test('diagram', async ({ page, context }) => {
     // ** Env variables a
     if (!process.env.FIGMA_EMAIL || !process.env.FIGMA_PASS || !process.env.MIRO_PASS) {
         throw new Error('FIGMA_EMAIL and FIGMA_PASS environment variables must be set');
